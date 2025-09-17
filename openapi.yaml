@@ -1,0 +1,140 @@
+openapi: 3.0.4
+info:
+  title: Sealed Secret Microservice
+  description: ""
+  version: 1.0.0
+tags:
+  - name: secret
+    description: Everything about your secrets
+paths:
+  /secrets/seal:
+    post:
+      tags:
+        - secret
+      summary: Seal a secret.
+      description: Seal a secret.
+      operationId: sealSecret
+      requestBody:
+        $ref: '#/components/requestBodies/Secret'
+      responses:
+        '200':
+          $ref: '#/components/responses/SealedSecret'
+        '400':
+          description: Invalid Input # Some fields are missing
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Error"
+                  - properties:
+                      code:
+                        enum:
+                          - 400
+        '422':
+          description: Validation exception # Invalid name, namespace, certificate or pair key
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Error"
+                  - properties:
+                      code:
+                        enum:
+                          - 422
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+components:
+  schemas:
+    Secret:
+      required:
+        - name
+        - namespace
+        - certificate
+        - pairs
+      type: object
+      properties:
+        name:
+          type: string
+        namespace:
+          type: string
+        certificate:
+          type: string
+        pairs:
+          type: array
+          minLength: 1
+          items:
+            type: object
+            properties:
+              key:
+                type: string
+              value:
+                type: string
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          minimum: 400
+          maximum: 600
+          exclusiveMaximum: true
+        message:
+          type: string
+      required:
+        - code
+        - message
+  requestBodies:
+    Secret:
+      required: true
+      description: Secret object that needs to be sealed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Secret'
+  responses:
+    SealedSecret:
+      description: Successful operation
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              apiVersion:
+                type: string
+              kind:
+                type: string
+              metadata:
+                type: object
+                properties:
+                  name:
+                    type: string
+                  namespace:
+                    type: string
+              spec:
+                description: SealedSecretSpec is the specification of a SealedSecret.
+                properties:
+                  encryptedData:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  template:
+                    properties:
+                      metadata:
+                        properties:
+                          name:
+                            type: string
+                          namespace:
+                            type: string
+                        type: object
+                      type:
+                        description: Used to facilitate programmatic handling of secret data.
+                        type: string
+                    type: object
+                required:
+                  - encryptedData
+                type: object
+            required:
+              - spec

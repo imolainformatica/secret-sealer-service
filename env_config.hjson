@@ -1,0 +1,10 @@
+SERVER_PORT: {
+   type: u16
+   description: The port the server will listen on
+   default: 8080
+}
+RUST_LOG: {
+    type: String
+    description: The log level from the log crate
+    default: info
+}

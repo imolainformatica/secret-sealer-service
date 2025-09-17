@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Secret Form</title>
+    <script>
+        function addKeyValuePair() {
+            const container = document.getElementById('kv-pairs');
+
+            const pairDiv = document.createElement('div');
+            pairDiv.className = 'kv-pair';
+
+            const keyInput = document.createElement('input');
+            keyInput.type = 'text';
+            keyInput.placeholder = 'Key';
+            keyInput.name = 'key';
+            keyInput.required = true;
+
+            const valueInput = document.createElement('input');
+            valueInput.type = 'text';
+            valueInput.placeholder = 'Value';
+            valueInput.name = 'value';
+            valueInput.required = true;
+
+            const removeButton = document.createElement('button');
+            removeButton.type = 'button';
+            removeButton.innerText = 'Remove';
+            removeButton.onclick = () => pairDiv.remove();
+
+            pairDiv.appendChild(keyInput);
+            pairDiv.appendChild(valueInput);
+            pairDiv.appendChild(removeButton);
+            container.appendChild(pairDiv);
+        }
+
+        function handleSubmit(event) {
+            event.preventDefault();
+
+            const resultElement = document.getElementById('result');
+            const name = document.getElementById('name').value;
+            const namespace = document.getElementById('namespace').value;
+            const certificate = document.getElementById('certificate').value;
+
+            const keyInputs = document.querySelectorAll('input[name="key"]');
+            const valueInputs = document.querySelectorAll('input[name="value"]');
+
+            const data = {
+                name: name,
+                namespace: namespace,
+                certificate: certificate,
+                data: {}
+            };
+
+            const keys = new Set();
+
+            for (let i = 0; i < keyInputs.length; i++) {
+                const key = keyInputs[i].value;
+                const value = valueInputs[i].value;
+
+                if (keys.has(key)) {
+                    alert("Duplicate key detected: " + key);
+                    return;
+                }
+                keys.add(key);
+                data.data[key] = value;
+            }
+
+            fetch('http://localhost:8080/secrets/seal', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            }).then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    return response.text();
+                }
+            }, error => {
+                return Promise.reject("Fatal error: " + error);
+            }).then(body => {
+                console.log(body);
+                if (typeof body === 'string') {
+                    resultElement.innerText = body;
+                    resultElement.style.setProperty('color', 'red');
+                } else {
+                    resultElement.innerText = JSON.stringify(body, null, 2);
+                    resultElement.style.setProperty('color', 'black');
+                }
+            }, error => {
+                resultElement.innerText = error;
+                resultElement.style.setProperty('color', 'red');
+            });
+        }
+    </script>
+</head>
+<body style="width: 100%; display: flex;">
+    <div style="width: 50%; margin: 0 1em;">
+        <h1>Submit Secret</h1>
+        <form id="secret-form" onsubmit="handleSubmit(event)">
+            <label for="name">Secret Name:</label>
+            <input type="text" id="name" required><br>
+
+            <label for="namespace">Secret Namespace:</label>
+            <input type="text" id="namespace" required><br>
+
+            <label for="certificate">Certificate:</label>
+            <textarea id="certificate" name="certificate" rows="34" cols="64" required></textarea><br>
+
+            <h3>Key-Value Pairs</h3>
+            <div id="kv-pairs"></div>
+            <button type="button" onclick="addKeyValuePair()">Add Key-Value Pair</button><br><br>
+
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+    <div style="width: 50%; margin: 0 1em;">
+        <h1>Result</h1>
+        <pre id="result" style="white-space: pre-wrap; word-wrap: break-word; word-break: break-all; color: black;"></pre>
+    </div>
+</body>
+</html>

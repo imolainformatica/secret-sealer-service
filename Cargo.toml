@@ -1,0 +1,16 @@
+[package]
+name = "secret-sealer-service"
+version = "0.1.0-1"
+edition = "2024"
+
+[dependencies]
+actix-cors = "0.7.1"
+actix-web = "4.11.0"
+actix-web-prom = { version = "0.10.0", features = ["process"] }
+declarative-env = "0.1.0"
+env_logger = "0.11.8"
+hierrorchy = "0.2.0"
+lazy_static = "1.5.0"
+log = "0.4.28"
+regex = "1.11.2"
+serde = "1.0.225"
