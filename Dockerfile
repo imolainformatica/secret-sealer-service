@@ -1,8 +1,9 @@
 FROM registry.mida.owaas.com/docker.io/library/rust:1.89 AS build
 WORKDIR /build
 ARG KUBESEAL_VERSION="0.32.2"
-RUN curl -OL "https://github.com/bitnami-labs/sealed-secrets/releases/download/v${KUBESEAL_VERSION:?}/kubeseal-${KUBESEAL_VERSION:?}-linux-amd64.tar.gz" && \
-        tar -xvzf kubeseal-${KUBESEAL_VERSION:?}-linux-amd64.tar.gz kubeseal
+ARG TARGETPLATFORM
+RUN curl -OL "https://github.com/bitnami-labs/sealed-secrets/releases/download/v${KUBESEAL_VERSION:?}/kubeseal-${KUBESEAL_VERSION:?}-$(echo "${TARGETPLATFORM}" | tr '/' '-').tar.gz" && \
+        tar -xvzf "kubeseal-${KUBESEAL_VERSION:?}-$(echo "${TARGETPLATFORM}" | tr '/' '-').tar.gz" kubeseal
 COPY . .
 RUN cargo build --release
 
