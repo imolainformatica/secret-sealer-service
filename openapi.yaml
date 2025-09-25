@@ -1,7 +1,7 @@
-openapi: 3.0.4
+openapi: 3.1.0
 info:
   title: Sealed Secret Microservice
-  description: ""
+  description: a
   version: 1.0.0
 tags:
   - name: secret
@@ -15,12 +15,12 @@ paths:
       description: Seal a secret.
       operationId: sealSecret
       requestBody:
-        $ref: '#/components/requestBodies/Secret'
+        $ref: "#/components/requestBodies/Secret"
       responses:
-        '200':
-          $ref: '#/components/responses/SealedSecret'
-        '400':
-          description: Invalid Input # Some fields are missing
+        "200":
+          $ref: "#/components/responses/SealedSecret"
+        "400":
+          description: Invalid Input
           content:
             application/json:
               schema:
@@ -30,8 +30,8 @@ paths:
                       code:
                         enum:
                           - 400
-        '422':
-          description: Validation exception # Invalid name, namespace, certificate or pair key
+        "422":
+          description: Validation exception
           content:
             application/json:
               schema:
@@ -54,7 +54,7 @@ components:
         - name
         - namespace
         - certificate
-        - pairs
+        - data
       type: object
       properties:
         name:
@@ -63,16 +63,13 @@ components:
           type: string
         certificate:
           type: string
-        pairs:
-          type: array
-          minLength: 1
-          items:
-            type: object
-            properties:
-              key:
-                type: string
-              value:
-                type: string
+        data:
+          type: object
+          minItems: 1
+          patternProperties:
+            "^[a-zA-Z0-9._-]+$":
+              type: string
+          properties: {}
     Error:
       type: object
       properties:
@@ -93,7 +90,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Secret'
+            $ref: "#/components/schemas/Secret"
   responses:
     SealedSecret:
       description: Successful operation
