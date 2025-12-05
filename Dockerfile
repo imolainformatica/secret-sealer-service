@@ -9,7 +9,7 @@ RUN cargo build --release
 
 FROM registry.mida.owaas.com/docker.io/library/alpine:3.22 AS kubeseal
 WORKDIR /build
-ARG KUBESEAL_VERSION="0.32.2"
+ARG KUBESEAL_VERSION="0.33.1"
 ARG TARGETPLATFORM
 RUN apk --no-cache add curl
 RUN curl -OL "https://github.com/bitnami-labs/sealed-secrets/releases/download/v${KUBESEAL_VERSION:?}/kubeseal-${KUBESEAL_VERSION:?}-$(echo "${TARGETPLATFORM}" | tr '/' '-').tar.gz" && \
